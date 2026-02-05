@@ -36,6 +36,7 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     assignLibraryRole(user: Principal, role: LibraryRole): Promise<void>;
     bookSeat(seatId: bigint, startTime: Time, endTime: Time): Promise<void>;
+    bootstrapAdmin(secret: string): Promise<void>;
     cancelBooking(): Promise<void>;
     getAllBookings(): Promise<Array<[Principal, Booking]>>;
     getAllUserProfiles(): Promise<Array<[Principal, UserProfile]>>;

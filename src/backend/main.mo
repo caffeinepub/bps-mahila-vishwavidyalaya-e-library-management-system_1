@@ -71,7 +71,7 @@ actor {
   var closingHour : Int = 20;
 
   // Helper function to get library role
-  private func getLibraryRole(user : Principal) : ?LibraryRole {
+  func getLibraryRole(user : Principal) : ?LibraryRole {
     switch (userProfiles.get(user)) {
       case (?profile) { ?profile.libraryRole };
       case (null) { null };

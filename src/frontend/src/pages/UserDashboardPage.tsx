@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useGetCallerUserProfile } from '../hooks/useCallerContext';
+import { useGetCallerUserProfile, useIsCallerAdmin } from '../hooks/useCallerContext';
 import { useGetMyBooking, useGetLibrarySchedule } from '../hooks/useQueries';
 import ActiveBookingCard from '../components/booking/ActiveBookingCard';
 import DateAndSlotPicker from '../components/booking/DateAndSlotPicker';
@@ -7,10 +7,12 @@ import SeatGrid from '../components/booking/SeatGrid';
 import SeatLegend from '../components/booking/SeatLegend';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, BookOpen } from 'lucide-react';
+import { Calendar, BookOpen, Info } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function UserDashboardPage() {
   const { data: userProfile } = useGetCallerUserProfile();
+  const { data: isAdmin } = useIsCallerAdmin();
   const { data: myBooking } = useGetMyBooking();
   const { data: schedule } = useGetLibrarySchedule();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -26,6 +28,16 @@ export default function UserDashboardPage() {
           Book your seat and manage your library reservations
         </p>
       </div>
+
+      {!isAdmin && (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertTitle>Admin Access Information</AlertTitle>
+          <AlertDescription>
+            Admin access requires one-time initialization. If you have been provided with a special admin link containing <code className="text-xs bg-muted px-1 py-0.5 rounded">#caffeineAdminToken=...</code>, open that link and log in to initialize admin access. Once initialized, the Admin Dashboard will become available in the navigation menu.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {hasActiveBooking && (
         <ActiveBookingCard booking={myBooking} />

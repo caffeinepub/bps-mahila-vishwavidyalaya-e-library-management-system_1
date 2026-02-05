@@ -1,343 +1,54 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "BPSMV E‑Library Frontend (Internet Identity + Seat/Slot Booking + Admin/User Dashboards)",
+  "title": "Frontend admin recovery bootstrap via URL hash token",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Add Internet Identity sign-in/out UX, authenticated-only routing for booking/admin areas, and signed-in state display.",
-      "acceptanceCriteria": [
-        "Unauthenticated users are prompted to sign in via Internet Identity before accessing booking/admin features",
-        "Frontend shows signed-in state and supports sign out"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "create",
-          "description": "Create the main application router/layout that gates booking/admin routes behind Internet Identity authentication (using the existing immutable useInternetIdentity + useActor hooks) and provides a signed-in vs signed-out experience."
-        },
-        {
-          "path": "frontend/src/components/auth/LoginButton.tsx",
-          "operation": "create",
-          "description": "Create a login/logout button using the existing Internet Identity hook patterns and clear cached React Query data on logout (per the authorization component guidance). Use the selected authorization component patterns for login state handling; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/auth/RequireAuth.tsx",
-          "operation": "create",
-          "description": "Add an auth guard wrapper that redirects unauthenticated users to the signed-out landing screen and prevents booking/admin screens from rendering until authenticated."
-        },
-        {
-          "path": "frontend/src/pages/SignedOutLandingPage.tsx",
-          "operation": "create",
-          "description": "Create a simple signed-out landing screen that prompts users to sign in via Internet Identity and displays the required library hero illustration asset."
-        },
-        {
-          "path": "frontend/public/assets/generated/library-hero.dim_1600x900.png",
-          "operation": "create",
-          "description": "Add the generated asset file and wire it into the signed-out landing UI as a static image (no backend storage)."
-        },
-        {
-          "path": "frontend/public/assets/generated/app-icon-book.dim_256x256.png",
-          "operation": "create",
-          "description": "Add the generated app icon asset file and wire it into the app header/navigation UI as a static image (no backend storage)."
-        }
-      ]
-    },
-    {
       "id": "REQ-2",
-      "summary": "Expose role-aware UI and admin-only navigation/areas; provide admin UI to view users and assign/change their library roles.",
+      "summary": "Extract `caffeineAdminToken` from the URL hash, persist it for the session, and after Internet Identity login call the backend admin-bootstrapping method then refresh admin-related React Query state without a hard reload.",
       "acceptanceCriteria": [
-        "UI reflects role (admin dashboard visible only to Admin)",
-        "Admin can view a users list with role displayed and can update a user’s role"
+        "The app uses the existing URL utilities (frontend/src/utils/urlParams.ts) to read `caffeineAdminToken` from the hash and persist it in sessionStorage for the session.",
+        "After successful login (Internet Identity), if a token is present, the app calls the backend bootstrapping method and then refreshes/invalidate relevant React Query state so `useIsCallerAdmin()` updates without a hard reload.",
+        "On success, the Admin Dashboard navigation link becomes visible in the header (AppShell) for the same session.",
+        "On failure (token invalid, or admin already initialized), show a clear English error message (non-crashing) and do not break normal user flows.",
+        "The token is removed from the address bar after extraction (leveraging existing clear-from-hash behavior)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useCallerContext.ts",
-          "operation": "create",
-          "description": "Create React Query hooks to fetch the caller's profile and role/admin status via the backend interface (e.g., getCallerUserProfile, getCallerUserRole, isCallerAdmin), following the selected authorization component guidance; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/auth/ProfileSetupModal.tsx",
-          "operation": "create",
-          "description": "Create a first-login profile setup modal that prompts for a human-readable name and saves it via saveCallerUserProfile (defaulting libraryRole safely in UI if required). Use the selected authorization component profile setup guidance to avoid modal flash; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/layout/AppShell.tsx",
-          "operation": "create",
-          "description": "Create a shared layout with role-aware navigation (User Dashboard always visible when authenticated; Admin Dashboard link only when isCallerAdmin() is true) and display the signed-in user's name (avoid displaying Principal IDs)."
-        },
-        {
-          "path": "frontend/src/components/admin/AdminOnly.tsx",
-          "operation": "create",
-          "description": "Create an admin guard that renders an Access Denied screen for authenticated non-admin users attempting to access admin features, using role signals fetched from the backend."
-        },
-        {
-          "path": "frontend/src/pages/AdminDashboardPage.tsx",
-          "operation": "create",
-          "description": "Create the Admin Dashboard shell with tabs/sections for Users, Bookings, and Configuration, and wire it under an admin-only route. Use the selected authorization component guidance for access control UI; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/admin/UserRoleManager.tsx",
-          "operation": "create",
-          "description": "Implement the admin users list UI using getAllUserProfiles() and allow updating a user's library role via assignLibraryRole(). Display clear success/error messages in English."
-        },
-        {
-          "path": "frontend/src/components/common/AccessDeniedScreen.tsx",
-          "operation": "create",
-          "description": "Create a reusable Access Denied UI used by admin-only guards and any unauthorized states."
+          "path": "frontend/src/backend.d.ts",
+          "operation": "modify",
+          "description": "Extend the typed backend interface to include the new admin recovery/bootstrapping backend function (the one that accepts the bootstrap secret and attempts to make the current caller an admin), so the frontend can call it with proper TypeScript typing."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Wire the Admin Dashboard route and apply admin-only guards so non-admins cannot access admin areas and admin navigation is hidden."
+          "description": "Wire an admin-initialization flow into the authenticated app lifecycle: (1) on app load/mount extract `caffeineAdminToken` using the existing URL utilities so it is persisted in sessionStorage and cleared from the address bar, (2) after successful Internet Identity login (when identity/actor is available) if a token exists call the backend bootstrapping function, and (3) on success/failure show a non-crashing English toast/message and invalidate/refetch React Query state (at minimum `isCallerAdmin`, and any other role/profile queries needed) so `useIsCallerAdmin()` updates and AppShell reveals the Admin Dashboard link in the same session."
+        },
+        {
+          "path": "frontend/src/hooks/useCallerContext.ts",
+          "operation": "modify",
+          "description": "Ensure `useIsCallerAdmin()` updates promptly after the bootstrap attempt by aligning its query key usage/invalidation expectations with the new flow (e.g., keeping `['isCallerAdmin']` stable and not overly caching), so invalidation/refetch from the bootstrap logic reliably causes the header admin link to appear without a full reload."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Show seat configuration and seat types in the UI; provide admin configuration UI to edit seat totals/reserved counts and reflect updated configuration in seat availability presentation.",
+      "summary": "Show a minimal guidance message for signed-in non-admin users explaining how one-time admin initialization works via a special token link and login, without revealing the token value.",
       "acceptanceCriteria": [
-        "Admin can update total seats and reserved seats count via a configuration UI and backend method",
-        "Seat list returned by backend reflects the current configuration"
+        "When the user is signed in but not an admin, the UI provides a short English explanation that admin access requires one-time initialization via a special link containing `#caffeineAdminToken=...` followed by login.",
+        "No UI element prints the actual token value.",
+        "The guidance does not appear for users already recognized as admins."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/components/admin/SeatConfigurationPanel.tsx",
-          "operation": "create",
-          "description": "Create an admin configuration panel that reads current seat configuration via getSeatConfiguration() and provides form controls to update total seats and reserved seats count (calling the corresponding backend capability). Display validation and backend error messages in English."
-        },
-        {
-          "path": "frontend/src/types/backend-extensions.d.ts",
-          "operation": "create",
-          "description": "Add a local TypeScript type augmentation for any required backend seat configuration update capability not present in current generated typings, so the admin configuration UI can call it in a type-safe way."
-        },
-        {
-          "path": "frontend/src/components/booking/SeatLegend.tsx",
-          "operation": "create",
-          "description": "Add a small legend component explaining reserved (research) vs general seats and how eligibility works, driven by the current user's library role and the active seat configuration."
-        },
-        {
-          "path": "frontend/src/pages/AdminDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Wire the SeatConfigurationPanel into the Admin Dashboard Configuration section and ensure changes trigger React Query refetch of configuration/availability-related queries."
-        }
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "summary": "Provide 2-hour slot selection UI derived from admin-configured library hours and prevent users from attempting multiple active bookings in the UX.",
-      "acceptanceCriteria": [
-        "Slots are exactly 2 hours long and derived from configured library hours",
-        "Admin can set library operating hours and changes take effect for slot generation"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/utils/timeSlots.ts",
-          "operation": "create",
-          "description": "Implement frontend utilities to generate fixed 2-hour slot ranges per selected date using library open/close hours from getLibrarySchedule() (and to convert user selections into backend Time bigint inputs)."
-        },
-        {
-          "path": "frontend/src/components/admin/LibraryHoursPanel.tsx",
-          "operation": "create",
-          "description": "Create an admin panel to view/edit library operating hours using getLibrarySchedule() and setLibraryHours(), with immediate UI confirmation and refetch of dependent slot/availability queries."
-        },
-        {
-          "path": "frontend/src/components/booking/DateAndSlotPicker.tsx",
-          "operation": "create",
-          "description": "Create a user-facing date picker + slot picker that uses getLibrarySchedule() and the 2-hour slot generator to offer only valid slots within configured operating hours."
-        },
-        {
-          "path": "frontend/src/components/booking/ActiveBookingCard.tsx",
-          "operation": "create",
-          "description": "Create a component that shows the user’s current active booking (from getMyBookings()) and disables/hides the booking form when an active booking exists, guiding the user to cancel before booking again."
-        },
-        {
-          "path": "frontend/src/pages/AdminDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Wire LibraryHoursPanel into the Admin Dashboard Configuration section."
-        },
-        {
-          "path": "frontend/src/pages/UserDashboardPage.tsx",
-          "operation": "create",
-          "description": "Create the User Dashboard page that composes ActiveBookingCard, DateAndSlotPicker, and seat availability/booking UI under an authenticated route."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "Display near real-time seat availability per selected date/slot and ensure availability reflects caller role eligibility (reserved vs general).",
-      "acceptanceCriteria": [
-        "Frontend can query availability for a selected date and slot and receive a deterministic list of seats with availability status",
-        "Availability respects seat reservation rules based on the caller’s role (e.g., reserved seats show as not bookable for general students)",
-        "After creating/cancelling a booking, availability updates on refresh/reload and via standard client-side refetch behavior"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useSeatAvailability.ts",
-          "operation": "create",
-          "description": "Create a React Query hook that fetches getAvailableSeats(startTime, endTime) and combines it with getSeatConfiguration() to compute a deterministic full seat map (available/unavailable + seat type), including role-based bookable flags."
-        },
-        {
-          "path": "frontend/src/components/booking/SeatGrid.tsx",
-          "operation": "create",
-          "description": "Create a responsive seat grid that renders all seats with availability status and disables seats not bookable for the current user role (e.g., reserved seats disabled for General Students)."
-        },
-        {
-          "path": "frontend/src/components/booking/BookingActions.tsx",
-          "operation": "create",
-          "description": "Implement booking creation/cancellation actions using bookSeat() and cancelBooking(), with clear English error handling and React Query invalidation/refetch of availability and booking queries on success."
-        },
         {
           "path": "frontend/src/pages/UserDashboardPage.tsx",
           "operation": "modify",
-          "description": "Wire SeatGrid + BookingActions into the User Dashboard so availability updates after booking/cancellation via standard refetch behavior."
-        }
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "summary": "Build an Admin Dashboard UI for managing users/roles, viewing/cancelling bookings, and editing configuration (seats + timings).",
-      "acceptanceCriteria": [
-        "Admin can view a users list with role displayed and can update a user’s role",
-        "Admin can view a bookings table showing date, slot, seat, and user identity reference",
-        "Admin can cancel any booking and see immediate reflected status",
-        "Admin can update configuration values and see them persisted and applied"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/admin/BookingsTable.tsx",
-          "operation": "create",
-          "description": "Create an admin bookings table UI using getAllBookings() that displays date, time slot, seat, and a user identity reference (prefer user profile name when available; otherwise show a shortened Principal string)."
-        },
-        {
-          "path": "frontend/src/components/admin/CancelBookingAction.tsx",
-          "operation": "create",
-          "description": "Add an admin cancel control for bookings (calling the corresponding backend capability for cancelling any booking) with success/error feedback and refetch of getAllBookings() after actions."
-        },
-        {
-          "path": "frontend/src/types/backend-extensions.d.ts",
-          "operation": "modify",
-          "description": "Extend local TypeScript typings for any required admin booking cancellation capability not present in current generated typings, so the Admin Dashboard can call it in a type-safe way."
-        },
-        {
-          "path": "frontend/src/pages/AdminDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Wire the Users, BookingsTable (with cancel), SeatConfigurationPanel, and LibraryHoursPanel into the Admin Dashboard with clear navigation between sections."
-        }
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "summary": "Build a User Dashboard UI for selecting dates/slots, viewing seat availability, booking a seat, cancelling own booking, and viewing booking history.",
-      "acceptanceCriteria": [
-        "Signed-in user can select a date and slot and see seat availability",
-        "User can create a booking that is validated by backend rules and receives success/failure feedback",
-        "User can cancel only their own bookings from the user UI",
-        "User can view a list of past bookings including cancelled/completed status"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/booking/BookingHistory.tsx",
-          "operation": "create",
-          "description": "Create a booking history section that displays historical booking entries (including cancelled/completed status) using available backend booking reads and client-side caching to present a user-friendly timeline in English."
-        },
-        {
-          "path": "frontend/src/hooks/useMyBooking.ts",
-          "operation": "create",
-          "description": "Create a React Query hook wrapping getMyBookings() and related derived UI state (loading/empty/error) for the current user’s active booking and history refresh triggers."
-        },
-        {
-          "path": "frontend/src/pages/UserDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Wire BookingHistory into the User Dashboard and ensure booking create/cancel actions refresh both active booking and history displays."
-        }
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "summary": "Ensure the frontend is production-ready for IC deployment by wiring sensible defaults into the UI flow without hardcoded secrets, and ensuring the app runs cleanly with the template structure.",
-      "acceptanceCriteria": [
-        "Project builds and runs locally with standard Internet Computer tooling and the provided template structure",
-        "Default configuration is applied on first install without manual database steps",
-        "Sample data is limited to non-sensitive defaults (e.g., seats/config); admin privileges are not granted via hardcoded credentials"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Ensure the app handles first-run states gracefully (e.g., missing profile/config until fetched), avoids any hardcoded admin secrets in UI logic, and provides clear English errors when backend rejects actions."
-        },
-        {
-          "path": "frontend/src/components/common/ErrorBanner.tsx",
-          "operation": "create",
-          "description": "Create a shared error banner/toast-like component for displaying backend errors (including authorization traps) in a student-friendly, English-only format."
-        },
-        {
-          "path": "frontend/src/hooks/useAppBootstrap.ts",
-          "operation": "create",
-          "description": "Add a small bootstrap hook that coordinates initial authenticated fetches (profile, role, config) and provides a single loading state to prevent flicker across guarded routes."
-        }
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "summary": "Implement a clean, responsive, student-friendly React + Tailwind UI with consistent navigation between dashboards and English-only text.",
-      "acceptanceCriteria": [
-        "UI is fully usable on mobile and desktop sizes",
-        "All user-facing labels, errors, and help text are in English",
-        "Role-based navigation hides admin areas from non-admin users"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "create",
-          "description": "Create the Tailwind CSS entry file expected by frontend/src/main.tsx (immutable) and include base/components/utilities plus app-level typography/layout tweaks for responsive readability."
+          "description": "Add a small, user-facing guidance block that renders only when the user is signed in and `useIsCallerAdmin()` indicates they are not an admin, explaining in English that admin access requires a one-time initialization by opening a special link containing `#caffeineAdminToken=...` and then logging in; ensure the token value is never displayed."
         },
         {
           "path": "frontend/src/components/layout/AppShell.tsx",
           "operation": "modify",
-          "description": "Ensure consistent navigation across authenticated pages, mobile-friendly header layout, and English-only labels for dashboard navigation items."
-        },
-        {
-          "path": "frontend/src/pages/UserDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Ensure the booking UI is responsive (seat grid adapts to screen size), uses clear English microcopy, and provides accessible form controls."
-        },
-        {
-          "path": "frontend/src/pages/AdminDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Ensure admin tables/forms are responsive, readable, and consistently styled with the rest of the app using Tailwind utility classes (without editing frontend/src/components/ui)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-12",
-      "summary": "Apply a coherent university-library visual theme across the app with a warm neutral palette (not blue/purple dominant).",
-      "acceptanceCriteria": [
-        "The theme is consistent across login, dashboards, tables, and forms",
-        "Primary palette is not predominantly blue/purple",
-        "Typography and spacing improve readability for non-technical users"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Define/override CSS variables and base styles to establish a warm neutral theme (e.g., sand/stone backgrounds, deep green/brown accents) and apply consistent typography/spacing rules across the app."
-        },
-        {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Adjust Tailwind theme tokens (via CSS variable-driven colors already configured) and any needed extensions to support the warm neutral library theme while avoiding a blue/purple-dominant palette."
-        },
-        {
-          "path": "frontend/src/components/layout/AppShell.tsx",
-          "operation": "modify",
-          "description": "Apply consistent theme styling to header/navigation and use the generated app icon asset in the layout for cohesive branding."
-        },
-        {
-          "path": "frontend/src/pages/SignedOutLandingPage.tsx",
-          "operation": "modify",
-          "description": "Ensure the signed-out landing uses the warm neutral theme and presents the required library hero illustration as a cohesive part of the visual identity."
+          "description": "Optionally reinforce the same guidance at the layout level (only for signed-in non-admins) so it’s discoverable even if the user navigates away from the dashboard; ensure it never prints the token value and does not show for admins."
         }
       ]
     }

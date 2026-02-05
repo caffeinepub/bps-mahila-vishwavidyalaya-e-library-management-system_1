@@ -1,18 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Build an Internet Computer on-chain e-library seat booking system with Internet Identity login, role-based access control, 2-hour slot bookings, and separate Admin/User dashboards.
+**Goal:** Allow one-time recovery bootstrapping so the currently signed-in user can become the initial Admin using the existing bootstrap secret, and provide a guided frontend flow using a token link.
 
 **Planned changes:**
-- Add Internet Identity authentication (sign in/out) and use caller Principal for all protected backend actions.
-- Implement on-chain user records with roles (Admin, Research Scholar, General Student) and enforce role-based access control; Admin can assign/change roles.
-- Create on-chain configuration and seat management with defaults (120 total seats, 20 research-reserved) and an Admin UI to update seats/reserved count.
-- Implement 2-hour slot generation from admin-configurable library operating hours and enforce one active booking per user at a time.
-- Implement booking rules: no double-booking same seat+slot; General Students cannot book research-reserved seats; Research Scholars can book any available seat type.
-- Add availability/query endpoints and UI to show seats per date/slot, reflecting bookability based on the signed-in user’s role.
-- Build Admin Dashboard: view users/roles, change roles, view all bookings, cancel any booking, configure seats and library timings.
-- Build User Dashboard: browse dates/slots/seats, book, cancel own bookings, and view booking history.
-- Ensure production-ready IC deployment defaults and secure initialization (no hardcoded admin secrets).
-- Create a clean, responsive React + TypeScript + Tailwind UI with an English-only, student-friendly theme that is not blue/purple-dominant and hides admin navigation for non-admin users.
+- Add a backend shared update method in `backend/main.mo` that accepts the bootstrap secret and makes the authenticated caller an Admin only if no admin has been initialized yet; otherwise return an explicit error.
+- Validate the bootstrap secret on the backend and reject missing/invalid secrets without changing any roles.
+- Implement a frontend flow that reads `caffeineAdminToken` from the URL hash (via existing URL utilities), stores it in `sessionStorage` for the session, clears it from the address bar, and after Internet Identity login calls the backend bootstrapping method.
+- After the bootstrap call, refresh/invalidate React Query state so `useIsCallerAdmin()` updates in-session and the Admin Dashboard link becomes visible immediately on success.
+- Add a minimal English guidance message for signed-in non-admin users explaining the one-time admin initialization via a special `#caffeineAdminToken=...` link + login, without ever displaying the token value; show clear, non-crashing English errors on failure (invalid token or already initialized).
 
-**User-visible outcome:** Users can sign in with Internet Identity, view seat availability by 2-hour slot, book/cancel seats within role rules, and see booking history; Admins can manage roles, view/cancel all bookings, and configure seats and library operating hours.
+**User-visible outcome:** A user can open the app with a special `#caffeineAdminToken=...` link, sign in, and (only if no admin exists yet) become the Admin in the same session; otherwise they see a clear error and can continue using the app normally.

@@ -1,85 +1,163 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Build a full-stack, production-ready E-Library Management System for BPS Mahila Vishwavidyalaya on the Internet Computer, featuring Internet Identity authentication, role-based access (Admin/Research Scholar/General Student), seat & 2-hour slot booking with reserved-seat rules, real-time availability, admin/user dashboards, and deployment-ready configuration.",
+  "summary": "A full-stack ICP (Internet Computer) e-library seat booking system for Bhagat Phool Singh Mahila Vishwavidyalaya. Users authenticate via Internet Identity, complete a simple profile, view library hours, and book a single 2-hour seat slot from an availability grid (with reserved seats restricted by role). Admins (bootstrapped via a one-time secret) can manage user roles, view all active bookings, and configure library operating hours. The frontend is a React + Vite app using TanStack Router/React Query and shadcn/ui + Tailwind styling; the backend is a Motoko canister with in-memory maps for seats, profiles, and bookings and a mixin-based access control layer.",
   "existing_features": [
     {
-      "id": "feature-implement-internet-identity-authentication-for-the-frontend-and-backend-so-users-can-sign-in-out-and-the-application-can-identify-the-caller-principal-for-all-protected-actions",
-      "title": "Implement Internet Identity authentication for the frontend and backend so users can sign in/out and the application can identify the caller Principal for all protected actions.",
-      "reqIds": [
-        "REQ-1"
+      "id": "IF-1",
+      "title": "Internet Identity authentication provider",
+      "synonyms": [
+        "II login",
+        "AuthClient integration"
       ],
+      "description": "Provides a React context (InternetIdentityProvider) wrapping AuthClient to load stored identities on startup, perform login with a long-lived delegation, and logout/clear identity state.",
+      "reqIds": [],
       "version": 1
     },
     {
-      "id": "feature-create-on-chain-user-and-role-management-with-roles-admin-research-scholar-general-student-ensure-admins-can-assign-change-roles-for-any-user-and-role-based-access-control-is-enforced-on-all-privileged-backend-methods",
-      "title": "Create on-chain user and role management with roles: Admin, Research Scholar, General Student; ensure Admins can assign/change roles for any user and role-based access control is enforced on all privileged backend methods.",
+      "id": "IF-2",
+      "title": "Backend actor creation and session-aware query invalidation",
+      "synonyms": [
+        "actor hook",
+        "canister client wiring"
+      ],
+      "description": "Creates an anonymous or authenticated canister actor based on the current identity, initializes access control on the canister, and invalidates/refetches non-actor React Query caches when the actor changes.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-3",
+      "title": "Access control initialization with admin bootstrap secret",
+      "synonyms": [
+        "admin bootstrap",
+        "token-based first admin"
+      ],
+      "description": "On authenticated actor creation, calls _initializeAccessControlWithSecret; the first caller providing the correct CAFFEINE_ADMIN_TOKEN becomes admin; other callers become users; guest is represented by anonymous principal.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-4",
+      "title": "Role-based authorization in Motoko backend",
+      "synonyms": [
+        "RBAC",
+        "permissions"
+      ],
+      "description": "Backend enforces admin-only operations (e.g., view all bookings, view all profiles, assign roles, configure hours, seat configuration) and user-only operations (profiles, personal booking actions) using a centralized AccessControl module.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-5",
+      "title": "User profile creation and update (with default library role)",
+      "synonyms": [
+        "profile onboarding",
+        "caller profile"
+      ],
+      "description": "Users can create/save a profile containing name and a libraryRole; new profiles default to GeneralStudent; updates preserve the existing role. Frontend shows a mandatory profile setup modal for new authenticated users.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-6",
+      "title": "Library hours schedule retrieval and admin configuration",
+      "synonyms": [
+        "operating hours",
+        "schedule"
+      ],
+      "description": "Backend exposes a public schedule derived from opening/closing hours; admins can update hours with validation. Frontend displays hours and provides an admin panel to set them.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-7",
+      "title": "Seat inventory with reserved/general classification",
+      "synonyms": [
+        "seat map",
+        "reserved seats"
+      ],
+      "description": "Backend initializes 120 seats, marking the first 20 as reserved and the remainder as general; reserved/general counts are computed and exposed to admins via a seat configuration endpoint.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-8",
+      "title": "Seat availability lookup for a time range with role filtering",
+      "synonyms": [
+        "available seats",
+        "seat search"
+      ],
+      "description": "Backend returns available seats for a requested start/end time by checking time overlap against existing bookings, and filters reserved seats to only ResearchScholars/Admins. Frontend queries this per selected date/slot.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-9",
+      "title": "Seat booking with validation rules",
+      "synonyms": [
+        "reservation creation",
+        "book seat"
+      ],
+      "description": "Authenticated users can book a seat for exactly 2 hours, not in the past, with conflict checks, one-active-booking restriction, and reserved-seat enforcement based on library role.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-10",
+      "title": "Booking cancellation",
+      "synonyms": [
+        "cancel reservation"
+      ],
+      "description": "Authenticated users can cancel their own active booking; frontend provides a confirmation dialog and updates cached booking/availability/admin tables via query invalidation.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-11",
+      "title": "User dashboard booking flow UI",
+      "synonyms": [
+        "seat booking UI",
+        "date/slot picker"
+      ],
+      "description": "User dashboard supports selecting a date and generated 2-hour time slot, viewing a legend with role-based reserved-seat messaging, selecting from a seat grid, and viewing an active booking card when booked.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-12",
+      "title": "Admin dashboard for user/booking management and configuration",
+      "synonyms": [
+        "admin tools",
+        "admin panels"
+      ],
+      "description": "Admin-only area with tabs to (1) view users and assign library roles, (2) view all active bookings with user name resolution, and (3) configure library hours and view seat configuration counts.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "IF-13",
+      "title": "Signed-out landing page branding and hero image with preload",
+      "synonyms": [
+        "public landing page",
+        "hero banner"
+      ],
+      "description": "Unauthenticated users see a branded landing page with university details, feature highlights, sign-in call-to-action, and the ELibrary.jpeg hero image; index.html preloads the hero image and sets favicon/title.",
+      "reqIds": [],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-frontend-admin-initialization-flow-that-reads-the-bootstrap-token-from-the-url-hash-parameter-caffeineadmintoken-and-after-the-user-signs-in-calls-the-backend-bootstrapping-method-to-make-the-current-user-an-admin-only-if-the-system-is-not-initialized-yet",
+      "title": "Implement a frontend admin-initialization flow that reads the bootstrap token from the URL hash parameter `caffeineAdminToken` and, after the user signs in, calls the backend bootstrapping method to make the current user an admin (only if the system is not initialized yet).",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-seat-computer-management-with-default-total-seats-120-and-reserved-seats-count-20-creating-bookable-seats-with-a-reserved-flag-research-reserved-vs-general-and-storing-this-configuration-on-chain",
-      "title": "Implement seat/computer management with default total seats = 120 and reserved seats count = 20, creating bookable seats with a reserved flag (research-reserved vs general) and storing this configuration on-chain.",
+      "id": "feature-add-a-minimal-user-facing-guidance-message-in-the-ui-for-the-admin-bootstrap-flow-so-the-user-knows-what-to-do-when-admin-is-not-initialized-token-link-login-without-exposing-the-secret-itself",
+      "title": "Add a minimal, user-facing guidance message in the UI for the admin bootstrap flow so the user knows what to do when admin is not initialized (token link + login), without exposing the secret itself.",
       "reqIds": [
         "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-a-fixed-2-hour-slot-booking-system-with-admin-configurable-library-operating-hours-generating-available-slots-per-date-based-on-the-configured-opening-closing-times-and-enforcing-one-active-booking-per-user-at-a-time",
-      "title": "Implement a fixed 2-hour slot booking system with admin-configurable library operating hours, generating available slots per date based on the configured opening/closing times and enforcing one active booking per user at a time.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-provide-seat-availability-and-booking-discovery-endpoints-so-the-frontend-can-show-near-real-time-availability-of-seats-per-slot-per-date-including-which-seats-are-available-unavailable-for-the-signed-in-user-s-role",
-      "title": "Provide seat availability and booking discovery endpoints so the frontend can show near real-time availability of seats per slot (per date), including which seats are available/unavailable for the signed-in user’s role.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-build-an-admin-dashboard-that-allows-viewing-all-users-and-their-roles-assigning-changing-roles-viewing-all-bookings-date-time-slot-seat-user-cancelling-any-booking-configuring-total-seats-reserved-seats-count-and-library-timings",
-      "title": "Build an Admin Dashboard that allows: viewing all users and their roles; assigning/changing roles; viewing all bookings (date, time slot, seat, user); cancelling any booking; configuring total seats, reserved seats count, and library timings.",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-build-a-user-dashboard-that-allows-viewing-available-dates-slots-and-seats-booking-a-seat-for-a-chosen-slot-cancelling-own-booking-s-viewing-booking-history",
-      "title": "Build a User Dashboard that allows: viewing available dates/slots and seats; booking a seat for a chosen slot; cancelling own booking(s); viewing booking history.",
-      "reqIds": [
-        "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-application-is-production-ready-for-internet-computer-deployment-include-deployment-configuration-sensible-defaults-120-seats-20-reserved-default-library-timings-and-sample-data-initialization-that-does-not-compromise-security-e-g-no-hardcoded-admin-secrets",
-      "title": "Ensure the application is production-ready for Internet Computer deployment: include deployment configuration, sensible defaults (120 seats, 20 reserved, default library timings), and sample data initialization that does not compromise security (e.g., no hardcoded admin secrets).",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-a-clean-responsive-student-friendly-ui-in-react-typescript-using-tailwind-css-with-consistent-navigation-between-user-dashboard-and-admin-dashboard-when-role-permits-and-english-only-user-facing-text",
-      "title": "Create a clean, responsive, student-friendly UI in React + TypeScript using Tailwind CSS, with consistent navigation between User Dashboard and Admin Dashboard (when role permits), and English-only user-facing text.",
-      "reqIds": [
-        "REQ-11"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-adopt-and-apply-a-coherent-visual-theme-across-the-app-colors-typography-layout-component-styling-suitable-for-a-university-library-interface-avoiding-a-blue-purple-dominant-palette",
-      "title": "Adopt and apply a coherent visual theme across the app (colors, typography, layout, component styling) suitable for a university library interface, avoiding a blue/purple-dominant palette.",
-      "reqIds": [
-        "REQ-12"
       ],
       "version": 1
     }
@@ -87,93 +165,41 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Internet Identity authentication with role-based access (Admin/Research Scholar/General Student) and admin role assignment",
+      "summary": "Add a safe admin re-initialization/reset path so an admin can be set when the bootstrap token was never used (make the current user principal admin).",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Seat/computer management: create 120 bookable seats with 20 reserved for Research Scholars and enforce booking eligibility rules",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "2-hour slot booking system with configurable library operating hours, one active booking per user, prevent double-booking, and real-time availability per slot",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Admin dashboard: manage users/roles, view/cancel any booking, configure seats/reserved count and library timings",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "User dashboard: view availability, book/cancel own bookings, and view booking history",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Frontend implementation using React + TypeScript (Vite) with Tailwind CSS; simple responsive student-friendly UI",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Backend Motoko canister: on-chain storage for users/roles/seats/slots/bookings with access control, error handling, and clean data models",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Deployment-ready Internet Computer project configuration including sensible defaults and sample data",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "Enforce booking eligibility and conflict rules: prevent double booking of the same seat and slot; allow Research Scholars to book research-reserved seats and general seats; prevent General Students from booking research-reserved seats; allow Research Scholars to book general seats even when reserved seats are available (no forced preference).",
+      "summary": "Add a backend recovery/bootstrapping method that allows the currently authenticated caller to become an Admin using the existing bootstrap secret when (and only when) no admin has been initialized yet.",
       "reqIds": [
-        "REQ-5"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-17",
-      "summary": "Implement clear backend data models and on-chain storage for users, roles, configuration (seats/reserved count/library timings), seats, slots (derivable), and bookings, with proper error handling and role-based access control for every update and admin-only read where appropriate.",
-      "reqIds": [
-        "REQ-9"
+        "REQ-1"
       ],
       "status": "pending"
     }
   ],
   "architectural_notes": [
-    "Platform: Internet Computer (IC) with Motoko backend canister and React+TypeScript (Vite) frontend.",
-    "Authentication via Internet Identity; enforce role-based access control for all privileged operations.",
-    "Booking rules: fixed 2-hour slots; one active booking per user; prevent double booking of same seat+slot; reserved-seat eligibility enforced (General cannot book reserved; Research may book general if reserved free).",
-    "Admin-configurable library operating hours, total seats, and reserved seats count.",
-    "Store users, roles, seats, slots, and bookings on-chain; include sensible defaults and sample data; production-ready (no mock/placeholder logic)."
+    "Motoko canister backend with in-memory state (Maps) for seats, bookings, and user profiles; no persistent stable storage visible.",
+    "Authorization implemented as a reusable module/mixin (AccessControl + MixinAuthorization) included into the main canister actor.",
+    "Admin bootstrap flow uses an environment variable (CAFFEINE_ADMIN_TOKEN) compared against a caller-provided secret; first valid caller becomes admin, others become users.",
+    "Frontend uses Internet Identity via @dfinity/auth-client with a React context provider to manage identity lifecycle and persistence.",
+    "Frontend canister calls are encapsulated in an actor hook (useActor) that rebuilds the actor on identity change and invalidates/refetches dependent React Query queries.",
+    "TanStack React Query is the primary data layer (queries + mutations) with cache invalidation patterns and toast notifications for UX feedback.",
+    "TanStack Router structures the app into signed-out landing, user dashboard, and admin dashboard routes guarded by backend-derived admin status.",
+    "UI built with shadcn/ui components, Tailwind tokens/themes, and icon libraries (lucide-react, react-icons).",
+    "Sensitive admin token is read from URL hash via a helper and persisted in sessionStorage, then removed from the URL to reduce leakage.",
+    "Current issue observed in production: admin panel hidden because no admin was ever initialized via the #caffeineAdminToken bootstrap flow; requires a reset/re-init mechanism to recover."
   ],
-  "known_issues": [],
-  "isFixRequest": false,
-  "imageRequirements": "## Required Images\n- Minimal flat illustration of a library reading room with desks and computers, warm neutral palette (library-hero.dim_1600x900.png)\n- Simple monochrome open-book icon, clean vector-like style (app-icon-book.dim_256x256.png)",
-  "generatedImages": [
-    {
-      "filename": "library-hero.dim_1600x900.png",
-      "description": "Minimal flat illustration of a library reading room with desks and computers, warm neutral palette",
-      "targetWidth": 1600,
-      "targetHeight": 900
-    },
-    {
-      "filename": "app-icon-book.dim_256x256.png",
-      "description": "Simple monochrome open-book icon, clean vector-like style",
-      "targetWidth": 256,
-      "targetHeight": 256
-    }
+  "known_issues": [
+    "Bookings are stored per-user as a single entry and are not auto-expired; once a user's booked time passes, they may still be blocked from booking again until they manually cancel (\"Cannot have multiple active bookings\").",
+    "Frontend seat grid logic hardcodes 120 total seats and 20 reserved seats; it does not derive seat counts/types from the backend seat configuration (backend only exposes counts).",
+    "AccessControl.getUserRole traps for authenticated-but-uninitialized users (\"User is not registered\"); correct behavior depends on _initializeAccessControlWithSecret being called for every authenticated session.",
+    "Naming inconsistency: backend method getMyBookings returns a single optional Booking; may confuse API consumers and maintenance.",
+    "Two different frontend/index.css contents appear in the code listing, suggesting possible duplicated/conflicting theme definitions depending on build output/source-of-truth.",
+    "If the site is never opened with the #caffeineAdminToken bootstrap link, no admin is created and admin UI will never appear for any user; recovery currently requires code changes/reset."
   ],
+  "isFixRequest": true,
+  "generatedImages": [],
   "gameProjectType": "none",
   "projectName": "BPS Mahila Vishwavidyalaya E-Library Management System",
   "clarification_mode": "instant",

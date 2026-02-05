@@ -5,10 +5,10 @@
   "frontend/src/utils/timeSlots.ts": "Utility functions for generating 2-hour time slots, converting between dates and nanoseconds, and formatting dates/times for display.",
   "frontend/src/components/auth/LoginButton.tsx": "Internet Identity login/logout button component with proper state handling and query cache clearing on logout.",
   "frontend/src/components/auth/ProfileSetupModal.tsx": "Modal dialog for first-time user profile setup that prompts for name and creates profile with default GeneralStudent role.",
-  "frontend/src/components/layout/AppShell.tsx": "Main application layout with header, role-aware navigation, user greeting, and footer with branding.",
+  "frontend/src/components/layout/AppShell.tsx": "Main application layout with header displaying BPS university logo and full accreditation information, role-aware navigation, user greeting, and footer with branding.",
   "frontend/src/components/common/AccessDeniedScreen.tsx": "Reusable access denied screen component for unauthorized access attempts.",
-  "frontend/src/pages/SignedOutLandingPage.tsx": "Landing page for unauthenticated users with library hero image, feature highlights, and sign-in prompt.",
-  "frontend/src/pages/UserDashboardPage.tsx": "User dashboard with tabs for booking seats and viewing library information, including active booking display and booking form.",
+  "frontend/src/pages/SignedOutLandingPage.tsx": "Landing page for unauthenticated users with BPS university logo, full accreditation text block, ELibrary.jpeg hero photo showing the actual reading room, feature highlights, and sign-in prompt.",
+  "frontend/src/pages/UserDashboardPage.tsx": "User dashboard with tabs for booking seats and viewing library information, including active booking display, booking form, and an informational alert for non-admin users explaining how admin initialization works.",
   "frontend/src/pages/AdminDashboardPage.tsx": "Admin dashboard with tabs for managing users, viewing bookings, and configuring library settings with access control.",
   "frontend/src/components/booking/ActiveBookingCard.tsx": "Card component displaying user's current active booking with details and cancel functionality.",
   "frontend/src/components/booking/DateAndSlotPicker.tsx": "Combined date picker and time slot selector for choosing booking date and 2-hour time slot.",
@@ -19,5 +19,7 @@
   "frontend/src/components/admin/LibraryHoursPanel.tsx": "Admin panel for configuring library opening and closing hours with hour selectors.",
   "frontend/src/components/admin/SeatConfigurationPanel.tsx": "Admin panel displaying current seat configuration (total, reserved, general seats) in a read-only view.",
   "frontend/src/index.css": "Global styles with warm neutral OKLCH color palette (sand/stone backgrounds, forest green primary, terracotta accents) for both light and dark modes.",
-  "frontend/tailwind.config.js": "Tailwind configuration with Inter font family, extended color tokens, custom shadows, and animation utilities."
+  "frontend/tailwind.config.js": "Tailwind configuration with Inter font family, extended color tokens, custom shadows, and animation utilities.",
+  "frontend/index.html": "HTML entry point with BPS university logo as favicon, preload hint for the ELibrary.jpeg hero image asset, and updated page title.",
+  "frontend/src/backend.d.ts": "TypeScript interface for backend canister including all methods for user profiles, bookings, library management, authorization, and the new bootstrapAdmin method for admin initialization."
 }

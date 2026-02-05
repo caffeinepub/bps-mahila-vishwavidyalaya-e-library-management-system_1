@@ -1,4 +1,4 @@
-import { createRouter, RouterProvider, createRoute, createRootRoute, Outlet, redirect } from '@tanstack/react-router';
+import { createRouter, RouterProvider, createRoute, createRootRoute, Outlet } from '@tanstack/react-router';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { useGetCallerUserProfile } from './hooks/useCallerContext';
 import SignedOutLandingPage from './pages/SignedOutLandingPage';
