@@ -1,0 +1,218 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-implement-internet-identity-authentication-for-the-frontend-and-backend-so-users-can-sign-in-out-and-the-application-can-identify-the-caller-principal-for-all-protected-actions",
+      "featureTitle": "Implement Internet Identity authentication for the frontend and backend so users can sign in/out and the application can identify the caller Principal for all protected actions.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/auth/LoginButton.tsx",
+        "frontend/src/pages/SignedOutLandingPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-on-chain-user-and-role-management-with-roles-admin-research-scholar-general-student-ensure-admins-can-assign-change-roles-for-any-user-and-role-based-access-control-is-enforced-on-all-privileged-backend-methods",
+      "featureTitle": "Create on-chain user and role management with roles: Admin, Research Scholar, General Student; ensure Admins can assign/change roles for any user and role-based access control is enforced on all privileged backend methods.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/admin/UserRoleManager.tsx",
+        "frontend/src/components/auth/ProfileSetupModal.tsx",
+        "frontend/src/components/common/AccessDeniedScreen.tsx",
+        "frontend/src/components/layout/AppShell.tsx",
+        "frontend/src/hooks/useCallerContext.ts",
+        "frontend/src/pages/AdminDashboardPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-seat-computer-management-with-default-total-seats-120-and-reserved-seats-count-20-creating-bookable-seats-with-a-reserved-flag-research-reserved-vs-general-and-storing-this-configuration-on-chain",
+      "featureTitle": "Implement seat/computer management with default total seats = 120 and reserved seats count = 20, creating bookable seats with a reserved flag (research-reserved vs general) and storing this configuration on-chain.",
+      "files": [
+        "frontend/src/components/admin/SeatConfigurationPanel.tsx",
+        "frontend/src/components/booking/SeatLegend.tsx",
+        "frontend/src/pages/AdminDashboardPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-a-fixed-2-hour-slot-booking-system-with-admin-configurable-library-operating-hours-generating-available-slots-per-date-based-on-the-configured-opening-closing-times-and-enforcing-one-active-booking-per-user-at-a-time",
+      "featureTitle": "Implement a fixed 2-hour slot booking system with admin-configurable library operating hours, generating available slots per date based on the configured opening/closing times and enforcing one active booking per user at a time.",
+      "files": [
+        "frontend/src/components/admin/LibraryHoursPanel.tsx",
+        "frontend/src/components/booking/ActiveBookingCard.tsx",
+        "frontend/src/components/booking/DateAndSlotPicker.tsx",
+        "frontend/src/pages/AdminDashboardPage.tsx",
+        "frontend/src/pages/UserDashboardPage.tsx",
+        "frontend/src/utils/timeSlots.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-provide-seat-availability-and-booking-discovery-endpoints-so-the-frontend-can-show-near-real-time-availability-of-seats-per-slot-per-date-including-which-seats-are-available-unavailable-for-the-signed-in-user-s-role",
+      "featureTitle": "Provide seat availability and booking discovery endpoints so the frontend can show near real-time availability of seats per slot (per date), including which seats are available/unavailable for the signed-in user’s role.",
+      "files": [
+        "frontend/src/components/booking/SeatGrid.tsx",
+        "frontend/src/pages/UserDashboardPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-an-admin-dashboard-that-allows-viewing-all-users-and-their-roles-assigning-changing-roles-viewing-all-bookings-date-time-slot-seat-user-cancelling-any-booking-configuring-total-seats-reserved-seats-count-and-library-timings",
+      "featureTitle": "Build an Admin Dashboard that allows: viewing all users and their roles; assigning/changing roles; viewing all bookings (date, time slot, seat, user); cancelling any booking; configuring total seats, reserved seats count, and library timings.",
+      "files": [
+        "frontend/src/components/admin/BookingsTable.tsx",
+        "frontend/src/pages/AdminDashboardPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-a-user-dashboard-that-allows-viewing-available-dates-slots-and-seats-booking-a-seat-for-a-chosen-slot-cancelling-own-booking-s-viewing-booking-history",
+      "featureTitle": "Build a User Dashboard that allows: viewing available dates/slots and seats; booking a seat for a chosen slot; cancelling own booking(s); viewing booking history.",
+      "files": [
+        "frontend/src/pages/UserDashboardPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-application-is-production-ready-for-internet-computer-deployment-include-deployment-configuration-sensible-defaults-120-seats-20-reserved-default-library-timings-and-sample-data-initialization-that-does-not-compromise-security-e-g-no-hardcoded-admin-secrets",
+      "featureTitle": "Ensure the application is production-ready for Internet Computer deployment: include deployment configuration, sensible defaults (120 seats, 20 reserved, default library timings), and sample data initialization that does not compromise security (e.g., no hardcoded admin secrets).",
+      "files": [
+        "frontend/src/App.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-clean-responsive-student-friendly-ui-in-react-typescript-using-tailwind-css-with-consistent-navigation-between-user-dashboard-and-admin-dashboard-when-role-permits-and-english-only-user-facing-text",
+      "featureTitle": "Create a clean, responsive, student-friendly UI in React + TypeScript using Tailwind CSS, with consistent navigation between User Dashboard and Admin Dashboard (when role permits), and English-only user-facing text.",
+      "files": [
+        "frontend/src/components/layout/AppShell.tsx",
+        "frontend/src/index.css",
+        "frontend/src/pages/AdminDashboardPage.tsx",
+        "frontend/src/pages/UserDashboardPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-11"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-adopt-and-apply-a-coherent-visual-theme-across-the-app-colors-typography-layout-component-styling-suitable-for-a-university-library-interface-avoiding-a-blue-purple-dominant-palette",
+      "featureTitle": "Adopt and apply a coherent visual theme across the app (colors, typography, layout, component styling) suitable for a university library interface, avoiding a blue/purple-dominant palette.",
+      "files": [
+        "frontend/src/components/layout/AppShell.tsx",
+        "frontend/src/index.css",
+        "frontend/src/pages/SignedOutLandingPage.tsx",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-12"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

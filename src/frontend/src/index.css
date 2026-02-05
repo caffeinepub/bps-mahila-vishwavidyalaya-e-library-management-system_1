@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.75rem;
+        
+        /* Warm neutral palette - sand/stone backgrounds with deep green/brown accents */
+        --background: 0.98 0.01 60;
+        --foreground: 0.25 0.02 60;
+        
+        --card: 1 0 0;
+        --card-foreground: 0.25 0.02 60;
+        
+        --popover: 1 0 0;
+        --popover-foreground: 0.25 0.02 60;
+        
+        /* Deep forest green primary */
+        --primary: 0.35 0.08 150;
+        --primary-foreground: 0.98 0.01 60;
+        
+        /* Warm sand secondary */
+        --secondary: 0.92 0.02 60;
+        --secondary-foreground: 0.25 0.02 60;
+        
+        --muted: 0.94 0.015 60;
+        --muted-foreground: 0.50 0.02 60;
+        
+        /* Warm terracotta accent */
+        --accent: 0.88 0.03 40;
+        --accent-foreground: 0.25 0.02 60;
+        
+        --destructive: 0.55 0.20 25;
+        --destructive-foreground: 0.98 0.01 60;
+        
+        --border: 0.90 0.015 60;
+        --input: 0.90 0.015 60;
+        --ring: 0.35 0.08 150;
+        
+        --chart-1: 0.60 0.15 150;
+        --chart-2: 0.65 0.12 40;
+        --chart-3: 0.55 0.10 200;
+        --chart-4: 0.70 0.14 30;
+        --chart-5: 0.50 0.12 180;
+    }
+
+    .dark {
+        /* Dark mode: deep browns and warm grays */
+        --background: 0.18 0.02 40;
+        --foreground: 0.95 0.01 60;
+        
+        --card: 0.22 0.02 40;
+        --card-foreground: 0.95 0.01 60;
+        
+        --popover: 0.20 0.02 40;
+        --popover-foreground: 0.95 0.01 60;
+        
+        /* Lighter forest green for dark mode */
+        --primary: 0.65 0.10 150;
+        --primary-foreground: 0.18 0.02 40;
+        
+        --secondary: 0.28 0.02 40;
+        --secondary-foreground: 0.95 0.01 60;
+        
+        --muted: 0.30 0.02 40;
+        --muted-foreground: 0.65 0.015 60;
+        
+        --accent: 0.40 0.03 40;
+        --accent-foreground: 0.95 0.01 60;
+        
+        --destructive: 0.60 0.18 25;
+        --destructive-foreground: 0.18 0.02 40;
+        
+        --border: 0.30 0.02 40;
+        --input: 0.30 0.02 40;
+        --ring: 0.65 0.10 150;
+        
+        --chart-1: 0.65 0.15 150;
+        --chart-2: 0.70 0.12 40;
+        --chart-3: 0.60 0.10 200;
+        --chart-4: 0.75 0.14 30;
+        --chart-5: 0.55 0.12 180;
+    }
+
+    * {
+        @apply border-border;
+    }
+    
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rlig" 1, "calt" 1;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        @apply font-semibold;
+        letter-spacing: -0.02em;
+    }
+}
+
+@layer utilities {
+    .text-balance {
+        text-wrap: balance;
+    }
+}

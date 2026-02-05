@@ -1,0 +1,244 @@
+{
+  "kind": "build_request",
+  "title": "BPSMV E‑Library Management System (Internet Identity + Seat & Slot Booking + Admin/User Dashboards)",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Implement Internet Identity authentication for the frontend and backend so users can sign in/out and the application can identify the caller Principal for all protected actions.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Use Internet Identity for login."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Unauthenticated users are prompted to sign in via Internet Identity before accessing booking/admin features",
+        "All backend mutations that depend on user identity use the authenticated caller Principal",
+        "Frontend shows signed-in state and supports sign out"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Create on-chain user and role management with roles: Admin, Research Scholar, General Student; ensure Admins can assign/change roles for any user and role-based access control is enforced on all privileged backend methods.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "User roles:Admin – full control\nResearch Scholar\nGeneral Student\nAdmin can assign or change user roles."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend stores a user record keyed by Principal with an assigned role",
+        "Only Admins can change another user's role",
+        "Non-admin callers cannot access admin-only operations (users list, global bookings view, configuration changes, cancel-any-booking)",
+        "UI reflects role (admin dashboard visible only to Admin)"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Implement seat/computer management with default total seats = 120 and reserved seats count = 20, creating bookable seats with a reserved flag (research-reserved vs general) and storing this configuration on-chain.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Total computers: 120\nCreate 120 bookable seats.\n20 seats reserved exclusively for Research Scholars.\n100 seats available for General Students."
+        ]
+      },
+      "acceptanceCriteria": [
+        "System initializes with 120 seats and exactly 20 marked research-reserved by default",
+        "Admin can update total seats and reserved seats count via a configuration UI and backend method",
+        "Seat list returned by backend reflects the current configuration"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Implement a fixed 2-hour slot booking system with admin-configurable library operating hours, generating available slots per date based on the configured opening/closing times and enforcing one active booking per user at a time.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Booking slots are fixed 2‑hour slots.\nLibrary operating hours configurable by admin.\nOne user can book only one slot at a time."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Slots are exactly 2 hours long and derived from configured library hours",
+        "Admin can set library operating hours and changes take effect for slot generation",
+        "Backend rejects creation of a new booking if the caller already has an active (non-cancelled) booking overlapping the requested slot"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Enforce booking eligibility and conflict rules: prevent double booking of the same seat and slot; allow Research Scholars to book research-reserved seats and general seats; prevent General Students from booking research-reserved seats; allow Research Scholars to book general seats even when reserved seats are available (no forced preference).",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Prevent double booking of the same seat and slot.\nResearch Scholars may also book general seats if reserved seats are free.\nGeneral students must NOT be able to book research‑reserved seats."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend rejects a booking if another active booking exists for the same seat and exact slot",
+        "Backend rejects a booking where caller role is General Student and the seat is research-reserved",
+        "Backend allows Research Scholar bookings for either seat type when available",
+        "All rule violations return clear error messages that the frontend displays"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Provide seat availability and booking discovery endpoints so the frontend can show near real-time availability of seats per slot (per date), including which seats are available/unavailable for the signed-in user’s role.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Show real‑time availability of seats per slot."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Frontend can query availability for a selected date and slot and receive a deterministic list of seats with availability status",
+        "Availability respects seat reservation rules based on the caller’s role (e.g., reserved seats show as not bookable for general students)",
+        "After creating/cancelling a booking, availability updates on refresh/reload and via standard client-side refetch behavior"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Build an Admin Dashboard that allows: viewing all users and their roles; assigning/changing roles; viewing all bookings (date, time slot, seat, user); cancelling any booking; configuring total seats, reserved seats count, and library timings.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Admin Dashboard\nView all users and their roles.\nView all bookings (date, time slot, seat, user).\nAbility to cancel any booking.\nConfigure total seats, reserved seats count, and library timings."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin can view a users list with role displayed and can update a user’s role",
+        "Admin can view a bookings table showing date, slot, seat, and user identity reference",
+        "Admin can cancel any booking and see immediate reflected status",
+        "Admin can update configuration values and see them persisted and applied"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Build a User Dashboard that allows: viewing available dates/slots and seats; booking a seat for a chosen slot; cancelling own booking(s); viewing booking history.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "User Dashboard\nView available slots and seats.\nBook and cancel own bookings.\nSee booking history."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Signed-in user can select a date and slot and see seat availability",
+        "User can create a booking that is validated by backend rules and receives success/failure feedback",
+        "User can cancel only their own bookings from the user UI",
+        "User can view a list of past bookings including cancelled/completed status"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Implement clear backend data models and on-chain storage for users, roles, configuration (seats/reserved count/library timings), seats, slots (derivable), and bookings, with proper error handling and role-based access control for every update and admin-only read where appropriate.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Store users, roles, seats, slots, and bookings on‑chain\nClear data models and access control\nProper error handling\nRole‑based access control\nNo placeholder logic\nNo mock features"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All persistent state is stored in the single Motoko main actor",
+        "All backend methods validate caller role and input, returning structured errors",
+        "No admin-only data/actions are accessible by non-admin principals",
+        "No placeholder or mock logic remains for booking/availability/role enforcement"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Ensure the application is production-ready for Internet Computer deployment: include deployment configuration, sensible defaults (120 seats, 20 reserved, default library timings), and sample data initialization that does not compromise security (e.g., no hardcoded admin secrets).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Deployment\nFully ready for deployment on Internet Computer\nInclude sensible defaults and sample data"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Project builds and runs locally with standard Internet Computer tooling and the provided template structure",
+        "Default configuration is applied on first install without manual database steps",
+        "Sample data is limited to non-sensitive defaults (e.g., seats/config); admin privileges are not granted via hardcoded credentials"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Create a clean, responsive, student-friendly UI in React + TypeScript using Tailwind CSS, with consistent navigation between User Dashboard and Admin Dashboard (when role permits), and English-only user-facing text.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Tailwind CSS for clean, responsive UI\nSimple, non‑technical interface suitable for students\nUse English for any user-facing text in the build request."
+        ]
+      },
+      "acceptanceCriteria": [
+        "UI is fully usable on mobile and desktop sizes",
+        "All user-facing labels, errors, and help text are in English",
+        "Role-based navigation hides admin areas from non-admin users"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "text": "Adopt and apply a coherent visual theme across the app (colors, typography, layout, component styling) suitable for a university library interface, avoiding a blue/purple-dominant palette.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The theme is consistent across login, dashboards, tables, and forms",
+        "Primary palette is not predominantly blue/purple",
+        "Typography and spacing improve readability for non-technical users"
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must follow a single-actor Motoko architecture with all logic in backend/main.mo.",
+    "Do not edit files under frontend/src/components/ui (compose them instead).",
+    "Do not edit immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx.",
+    "Use Internet Identity as the only authentication mechanism."
+  ],
+  "nonGoals": [
+    "No third-party authentication providers beyond Internet Identity.",
+    "No external databases or off-chain persistence.",
+    "No real-time WebSocket features; availability updates should use normal polling/refetch patterns if needed.",
+    "No mobile native app (web app only)."
+  ],
+  "imageRequirements": {
+    "required": [
+      "Minimal flat illustration of a library reading room with desks and computers, warm neutral palette (library-hero.dim_1600x900.png)",
+      "Simple monochrome open-book icon, clean vector-like style (app-icon-book.dim_256x256.png)"
+    ],
+    "edits": []
+  }
+}
